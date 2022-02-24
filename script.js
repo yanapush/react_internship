@@ -37,9 +37,7 @@ function getNode(card) {
 }
 
 function renderCards() {
-    cards_nodes.forEach(value => {
-        render(main_section, value);
-    })
+    cards.forEach(card => main_section.appendChild(cards_nodes.get(card.id)));
 }
 
 function render(root, node) {
@@ -75,11 +73,15 @@ function createCard() {
 }
 
 function shuffle() {
-    console.log(cards_nodes)
-   cards_nodes.forEach(value => {
-       value.style.order = Math.floor(Math.random() * 400);
-   })
-    console.log(cards_nodes.size)
+    let currentIndex = cards.length,  randomIndex;
+
+    while (currentIndex != 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [cards[currentIndex], cards[randomIndex]] = [
+            cards[randomIndex], cards[currentIndex]];
+    }
+    return cards;
 }
 
 
@@ -97,6 +99,7 @@ add_front_button.addEventListener("click", function () {
 
 shuffle_button.addEventListener("click", function () {
     shuffle();
+    renderCards();
 })
 
 
