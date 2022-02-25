@@ -17,43 +17,37 @@ async function generatePost(post) {
     });
     buttonSection.appendChild(button);
     postNode.appendChild( buttonSection);
-    let loadingIndicator = document.createElement('img');
-    loadingIndicator.src = 'resources/loading.gif';
-    loadingIndicator.classList.add('load-indicator');
-    postNode.appendChild(loadingIndicator);
     await postNode.appendChild(await generateCommentSection1(post.id));
     return postNode;
 }
 
 async function generateCommentSection1()  {
     let commentsContainer = document.createElement('div');
-    commentsContainer.classList.add('comment-section__comments');
-
-    // commentsContainer.appendChild(loadingIndicator);
+    commentsContainer.classList.add('post__comment-section');
+    let loadingIndicator = document.createElement('img');
+    loadingIndicator.src = 'resources/loading.gif';
+    loadingIndicator.classList.add('load-indicator');
+    commentsContainer.appendChild(loadingIndicator);
     return commentsContainer;
 }
 
 
 async function generateCommentSection(commentsContainer)  {
-    commentsContainer.parentNode.querySelector('.load-indicator').classList.add('load-indicator--active');
+    commentsContainer.querySelector('.load-indicator').classList.add('load-indicator--active');
     let id = commentsContainer.parentNode.dataset.id;
     console.log(commentsContainer.parentElement.classList)
+    let commentsSection = document.createElement('div');
+    commentsSection.classList.add('comment-section__comments');
+    commentsContainer.appendChild(commentsSection)
     let response = await fetch(`https://immense-wave-41493.herokuapp.com/https://jsonplaceholder.typicode.com/posts/${id}/comments`);
     let comments = await response.json();
     console.log(comments);
     comments.forEach((comment) => {
-        commentsContainer.appendChild(generateComment(comment));
+        commentsSection.appendChild(generateComment(comment));
     });
+    commentsContainer.querySelector('.load-indicator').classList.remove('load-indicator--active');
 }
-function showUserCard(card) {
-    let infoCardList = card.querySelector('.post__user-info').classList;
-    if (infoCardList.contains('post__user-info--active')) {
-        infoCardList.remove('post__user-info--active')
-    } else {
-        infoCardList.add('post__user-info--active')
-    }
 
-}
 
 generateComment = (comment) => {
     let commentNode = document.createElement('div');
@@ -90,6 +84,15 @@ generatePostMainPart = (post) => {
     return mainContainer;
 }
 
+function showUserCard(card) {
+    let infoCardList = card.querySelector('.post__user-info').classList;
+    if (infoCardList.contains('post__user-info--active')) {
+        infoCardList.remove('post__user-info--active')
+    } else {
+        infoCardList.add('post__user-info--active')
+    }
+}
+
 async function generateUserInfo(id) {
     let userInfo = document.createElement('div');
     userInfo.classList.add('post__user');
@@ -114,6 +117,7 @@ async function generateUserCard(id) {
     let user = await getUser(id);
     let userCard = document.createElement('div');
     userCard.classList.add('post__user-info');
+    userCard.dataset.id = id;
     let username = document.createElement('h2');
     username.classList.add('user-info__username');
     username.innerText = user.username;
@@ -135,15 +139,14 @@ async function generateUserCard(id) {
 
 async function getUsers() {
     let response = await fetch('https://immense-wave-41493.herokuapp.com/https://jsonplaceholder.typicode.com/users');
-    let users = await response.json();
-    return users;
+    return await response.json();
 }
 
 async function getUser(id) {
     let response = await fetch(`https://immense-wave-41493.herokuapp.com/https://jsonplaceholder.typicode.com/users/${id}`);
-    let user = await response.json();
-    return user;
+    return await response.json();
 }
+
 async function generateNavBar() {
      let users = await getUsers()
     let userButton = document.createElement('button');
@@ -193,24 +196,20 @@ async function generateUserPosts(id) {
     }
 }
 
-async function loadComments(id) {
-    let response = await fetch(`https://immense-wave-41493.herokuapp.com/https://jsonplaceholder.typicode.com/posts?userId=${id}/comments`);
-    return await response.json();
-}
-
 async function showCommentSection(button, id) {
     if (button.classList.contains('comment-button--hide')) {
         button.classList.remove('comment-button--hide');
         button.innerText ="Show Comments";
-        // button.parentNode.parentNode.querySelector(".comment-section__comments")
-        //     .classList.remove('comment-section__comments--visible');
-        button.parentNode.parentElement.querySelector(".comment-section__comments").innerHTML = '';
+        button.parentNode.parentElement.querySelector(".comment-section__comments").classList.add('comment-section__comments--hidden');
     } else {
         button.classList.add('comment-button--hide');
         button.innerText ="Hide";
-        console.log('this is' + button.parentElement.parentElement.classList)
-        await generateCommentSection(button.parentNode.parentNode.querySelector('.comment-section__comments'));
-        button.parentNode.parentNode.querySelector('.load-indicator').classList.remove('load-indicator--active');
+        let commentSection = button.parentNode.parentNode.querySelector('.post__comment-section');
+        if (commentSection.getElementsByClassName('comment-section__comments').length !== 0) {
+            commentSection.querySelector('.comment-section__comments').classList.remove('comment-section__comments--hidden')
+        } else {
+            await generateCommentSection(button.parentNode.parentNode.querySelector('.post__comment-section'));
+        }
     }
 }
 

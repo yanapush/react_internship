@@ -44,7 +44,6 @@ button:hover {
 
 .post {
     width: 90%;
-    /*background-color: #45caff;*/
     margin: 10px auto;
     border-radius: 10px;
     overflow: hidden;
@@ -60,8 +59,9 @@ button:hover {
 }
 
 .post__user-info {
-    width: 60%;
-    height: 10rem;
+    width: 40%;
+    padding: 10px;
+    height: 13rem;
     position: absolute;
     top: 2px;
     right: 2px;
@@ -134,8 +134,8 @@ p {
      /*display: none;*/
  }
 
- .comment-section__comments--visible {
-     display: flex;
+ .comment-section__comments--hidden {
+     display: none;
  }
 
  .load-indicator {
