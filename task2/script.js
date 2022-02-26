@@ -1,14 +1,12 @@
 let postsSection = document.querySelector(".posts");
 let usersSection = document.querySelector("nav");
 
-generatePosts = () => {
+generatePosts = (posts) => {
     postsSection.innerHTML = '';
-    getPosts().then((posts) => {
-        for (const post of posts) {
-            let postNode = generatePost(post);
-            postsSection.appendChild(postNode)
-        }
-    });
+    for (const post of posts) {
+        let postNode = generatePost(post);
+        postsSection.appendChild(postNode)
+    }
 }
 
 generateUserPosts = (id) => {
@@ -21,7 +19,7 @@ generateUserPosts = (id) => {
     });
 }
 
-generateNavBar = () => {
+generateNavBar = (users) => {
     let userButton = document.createElement('button');
     userButton.classList.add('users-nav__card');
     userButton.classList.add('user-nav__card--active');
@@ -33,20 +31,18 @@ generateNavBar = () => {
         }
     }, false);
     usersSection.appendChild(userButton);
-    getUsers().then((users) => {
-        for (const user of users) {
-            let userButton = document.createElement('button');
-            userButton.classList.add('users-nav__card');
-            userButton.innerText = user.username;
-            userButton.addEventListener("click", function () {
-                if (!userButton.classList.contains('user-nav__card--active')) {
-                    setActiveUser(this);
-                    generateUserPosts(user.id);
-                }
-            })
-            usersSection.appendChild(userButton);
-        }
-    });
+    for (const user of users) {
+        let userButton = document.createElement('button');
+        userButton.classList.add('users-nav__card');
+        userButton.innerText = user.username;
+        userButton.addEventListener("click", function () {
+            if (!userButton.classList.contains('user-nav__card--active')) {
+                setActiveUser(this);
+                generateUserPosts(user.id);
+            }
+        })
+        usersSection.appendChild(userButton);
+    }
 }
 
 generatePost = (post) => {
@@ -64,7 +60,7 @@ generatePost = (post) => {
         await showCommentSection(button, post.id);
     });
     buttonSection.appendChild(button);
-    postNode.appendChild( buttonSection);
+    postNode.appendChild(buttonSection);
     postNode.appendChild(generateCommentSection1(post.id));
     return postNode;
 }
@@ -147,10 +143,10 @@ generateCommentSection = (commentsContainer) => {
     commentsSection.classList.add('comment-section__comments');
     commentsContainer.appendChild(commentsSection)
     getComments(id).then((comments) => {
-    comments.forEach((comment) => {
-        commentsSection.appendChild(generateComment(comment));
-    });
-    commentsContainer.querySelector('.load-indicator').classList.remove('load-indicator--active');
+        comments.forEach((comment) => {
+            commentsSection.appendChild(generateComment(comment));
+        });
+        commentsContainer.querySelector('.load-indicator').classList.remove('load-indicator--active');
     });
 }
 
@@ -184,7 +180,7 @@ showUserCard = (card) => {
     }
 }
 
-setActiveUser =(el) => {
+setActiveUser = (el) => {
     let array = Array.from(usersSection.children);
     array.forEach(user => user.classList.remove('user-nav__card--active'));
     el.classList.add('user-nav__card--active');
@@ -193,11 +189,11 @@ setActiveUser =(el) => {
 showCommentSection = (button) => {
     if (button.classList.contains('comment-button--hide')) {
         button.classList.remove('comment-button--hide');
-        button.innerText ="Show Comments";
+        button.innerText = "Show Comments";
         button.parentNode.parentElement.querySelector(".comment-section__comments").classList.add('comment-section__comments--hidden');
     } else {
         button.classList.add('comment-button--hide');
-        button.innerText ="Hide";
+        button.innerText = "Hide";
         let commentSection = button.parentNode.parentNode.querySelector('.post__comment-section');
         if (commentSection.getElementsByClassName('comment-section__comments').length !== 0) {
             commentSection.querySelector('.comment-section__comments').classList.remove('comment-section__comments--hidden')
@@ -218,8 +214,8 @@ async function getUsers() {
 }
 
 async function getUser(id) {
-        let response = await fetch(`https://immense-wave-41493.herokuapp.com/https://jsonplaceholder.typicode.com/users/${id}`);
-        return await response.json();
+    let response = await fetch(`https://immense-wave-41493.herokuapp.com/https://jsonplaceholder.typicode.com/users/${id}`);
+    return await response.json();
 }
 
 async function getPosts() {
@@ -232,5 +228,12 @@ async function getUserPosts(id) {
     return await response.json();
 }
 
-generateNavBar();
-generatePosts();
+const main = async () => {
+    const users = await getUsers();
+    generateNavBar(users);
+
+    const posts = await getPosts();
+    generatePosts(posts);
+}
+
+main();
