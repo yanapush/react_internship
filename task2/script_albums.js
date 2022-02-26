@@ -28,7 +28,7 @@ async function getAlbumPhotos(albumId) {
     return await response.json();
 }
 
-generateNavBar = () => {
+generateNavBar = (users) => {
     let userButton = document.createElement('button');
     userButton.classList.add('users-nav__card');
     userButton.classList.add('user-nav__card--active');
@@ -41,20 +41,18 @@ generateNavBar = () => {
         }
     }, false);
     usersSection.appendChild(userButton);
-    getUsers().then((users) => {
-        for (const user of users) {
-            let userButton = document.createElement('button');
-            userButton.classList.add('users-nav__card');
-            userButton.innerText = user.username;
-            userButton.addEventListener("click", async function () {
-                if (!userButton.classList.contains('user-nav__card--active')) {
-                    setActiveUser(this);
-                    await generateUserAlbums(user.id);
-                }
-            })
-            usersSection.appendChild(userButton);
-        }
-    });
+    for (const user of users) {
+        let userButton = document.createElement('button');
+        userButton.classList.add('users-nav__card');
+        userButton.innerText = user.username;
+        userButton.addEventListener("click", async function () {
+            if (!userButton.classList.contains('user-nav__card--active')) {
+                setActiveUser(this);
+                await generateUserAlbums(user.id);
+            }
+        })
+        usersSection.appendChild(userButton);
+    }
 }
 
 generateAlbum = (album) => {
@@ -69,11 +67,11 @@ generateAlbum = (album) => {
     albumNode.appendChild(albumHeader);
     let photosContainer = document.createElement('div');
     photosContainer.classList.add('album__photos');
-    getAlbumPhotos(album.id).then((photos) => {
+    getAlbumPhotos(album.id).then(photos => {
         for (let i = 0; i < 4; ++i) {
             photosContainer.appendChild(generatePhotoContainer(photos[i]));
         }
-    });
+    })
     albumNode.appendChild(photosContainer);
     albumNode.dataset.id = album.id;
     albumNode.addEventListener("click", async function () {
@@ -122,7 +120,7 @@ generateModalWindow = (id) => {
             for (const photo of photos) {
                 photosContainer.appendChild(generateBigPhotoContainer(photo));
             }
-        });
+        })
     });
     modalWindow.appendChild(photosContainer);
     modalWindow.dataset.id = id;
@@ -158,13 +156,11 @@ generatePhotoContainer = (photo) => {
     return container
 }
 
-generateAlbums = () => {
+generateAlbums = (albums) => {
     albumsSection.innerHTML = '';
-    getAlbums().then(albums => {
-        for (const album of albums) {
-            albumsSection.appendChild(generateAlbum(album));
-        }
-    });
+    for (const album of albums) {
+        albumsSection.appendChild(generateAlbum(album));
+    }
 }
 
 generateUserAlbums = (id) => {
@@ -177,5 +173,12 @@ generateUserAlbums = (id) => {
     })
 }
 
-generateNavBar();
-generateAlbums();
+const main = async () => {
+    const users = await getUsers();
+    generateNavBar(users);
+
+    const albums = await getAlbums();
+    generateAlbums(albums);
+}
+
+main();
